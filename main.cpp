@@ -29,8 +29,32 @@ int main() {
     Point food = {generateRandomInt(1, max_y - 2), generateRandomInt(1, max_x - 2)};
     int direction = KEY_RIGHT;
     int score = 0;
-    bool game_over = false, pause = false, win = false;
+    bool game_over = false, pause = false, win = false, solidWalls;
 	int difficulty = 0;
+
+    nodelay(stdscr, FALSE); 
+    echo();
+
+    mvprintw(max_y / 2 - 1, (max_x - 20) / 2, "Solid walls:");
+    mvprintw(max_y / 2, (max_x - 25) / 2, "1 - yes, 2 - no");
+    mvprintw(max_y / 2 + 2, (max_x - 20) / 2, "Your choice: ");
+    refresh();
+
+    int input = getch();
+    switch (input) {
+        case '1':
+            solidWalls = true;
+            break;
+        case '2':
+            solidWalls = false;
+            break;
+        default:
+            solidWalls = true; 
+    }
+
+    noecho();
+    nodelay(stdscr, TRUE);
+    clear();
 
     while((ch = getch()) != 'q') {
 		if (ch == ' ') pause = !pause;
@@ -51,10 +75,17 @@ int main() {
 				case KEY_RIGHT: head.x++; break;
 			}
 
-			if (head.x < 0 || head.x >= max_x || head.y < 0 || head.y >= max_y) {
-				game_over = true;
-				break;
-			}
+            if (solidWalls) {
+                if (head.x < 0 || head.x >= max_x || head.y < 0 || head.y >= max_y) {
+                    game_over = true;
+                    break;
+                }
+            } else {
+                if (head.x < 0) head.x = max_x - 1;
+                if (head.x >= max_x) head.x = 0;
+                if (head.y < 0) head.y = max_y - 1;
+                if (head.y >= max_y) head.y = 0;
+            }
 
 			for (const auto& segment : snake) {
 				if (segment.x == head.x && segment.y == head.y) {
